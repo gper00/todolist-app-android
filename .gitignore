@@ -1,3 +1,7 @@
 .gradle/
 .vscode/
+.idea
+.kotlin/
 app/build/
+local.properties
+PLAN.md
