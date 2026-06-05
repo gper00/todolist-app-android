@@ -4,11 +4,16 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.sqlite.db.SupportSQLiteDatabase
+import com.example.todolist.model.Category
 import com.example.todolist.model.Task
 import com.example.todolist.model.User
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @Database(
-    entities = [User::class, Task::class],
+    entities = [User::class, Task::class, Category::class],
     version = 1,
     exportSchema = false
 )
@@ -16,6 +21,45 @@ abstract class AppDatabase : RoomDatabase() {
 
     abstract fun userDao(): UserDao
     abstract fun taskDao(): TaskDao
+    abstract fun categoryDao(): CategoryDao
+
+    private class AppDatabaseCallback(
+        private val scope: CoroutineScope
+    ) : RoomDatabase.Callback() {
+
+        override fun onCreate(db: SupportSQLiteDatabase) {
+            super.onCreate(db)
+            INSTANCE?.let { database ->
+                scope.launch(Dispatchers.IO) {
+                    populateDatabase(database.taskDao(), database.categoryDao())
+                }
+            }
+        }
+
+        suspend fun populateDatabase(taskDao: TaskDao, categoryDao: CategoryDao) {
+            // Seed Categories
+            val categories = listOf(
+                Category(name = "Work", color = "#4285F4"),
+                Category(name = "Personal", color = "#EA4335"),
+                Category(name = "Shopping", color = "#FBBC05"),
+                Category(name = "Study", color = "#34A853")
+            )
+            categories.forEach { categoryDao.insertCategory(it) }
+
+            // Seed Tasks
+            val tasks = listOf(
+                Task(title = "Meeting with Client", description = "Discuss project requirements", deadline = "20 June 2026", priority = "High", category = "Work"),
+                Task(title = "Buy Groceries", description = "Eggs, Milk, Bread, Fruits", deadline = "06 June 2026", priority = "Medium", category = "Shopping"),
+                Task(title = "Finish Homework", description = "Complete math exercises", deadline = "07 June 2026", priority = "High", category = "Study"),
+                Task(title = "Go for a Run", description = "5km in the park", deadline = "05 June 2026", priority = "Low", category = "Personal", isDone = true),
+                Task(title = "Read a Book", description = "Read 20 pages of 'Atomic Habits'", deadline = "08 June 2026", priority = "Medium", category = "Personal"),
+                Task(title = "Fix Bug #123", description = "Fix login crash issue", deadline = "10 June 2026", priority = "High", category = "Work"),
+                Task(title = "Clean the House", description = "Vacuum and dust all rooms", deadline = "12 June 2026", priority = "Low", category = "Personal"),
+                Task(title = "Update Portfolio", description = "Add new projects to website", deadline = "15 June 2026", priority = "Medium", category = "Work")
+            )
+            tasks.forEach { taskDao.insertTask(it) }
+        }
+    }
 
     companion object {
         @Volatile
@@ -27,7 +71,10 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "todo_db"
-                ).build()
+                )
+                .addCallback(AppDatabaseCallback(CoroutineScope(Dispatchers.IO)))
+                .fallbackToDestructiveMigration()
+                .build()
 
                 INSTANCE = instance
                 instance

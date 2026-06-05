@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
 import com.example.todolist.database.AppDatabase
+import com.example.todolist.model.Category
 import com.example.todolist.model.Task
 import com.example.todolist.repository.TodoRepository
 import kotlinx.coroutines.launch
@@ -14,23 +15,46 @@ class TaskViewModel(application: Application)
 
     private val repository: TodoRepository
     val allTasks: LiveData<List<Task>>
+    val allCategories: LiveData<List<Category>>
 
     init {
-        val dao = AppDatabase
-            .getDatabase(application)
-            .taskDao()
+        val db = AppDatabase.getDatabase(application)
+        val taskDao = db.taskDao()
+        val categoryDao = db.categoryDao()
+        val userDao = db.userDao()
 
-        repository = TodoRepository(dao)
+        repository = TodoRepository(taskDao, categoryDao, userDao)
         allTasks = repository.allTasks
+        allCategories = repository.allCategories
     }
 
-    fun insert(task: Task) =
-        viewModelScope.launch {
-            repository.insert(task)
-        }
+    // TASKS
+    fun insertTask(task: Task) = viewModelScope.launch {
+        repository.insertTask(task)
+    }
 
-    fun delete(task: Task) =
-        viewModelScope.launch {
-            repository.delete(task)
-        }
+    fun updateTask(task: Task) = viewModelScope.launch {
+        repository.updateTask(task)
+    }
+
+    fun deleteTask(task: Task) = viewModelScope.launch {
+        repository.deleteTask(task)
+    }
+
+    fun searchTasks(query: String): LiveData<List<Task>> {
+        return repository.searchTasks(query)
+    }
+
+    // CATEGORIES
+    fun insertCategory(category: Category) = viewModelScope.launch {
+        repository.insertCategory(category)
+    }
+
+    fun updateCategory(category: Category) = viewModelScope.launch {
+        repository.updateCategory(category)
+    }
+
+    fun deleteCategory(category: Category) = viewModelScope.launch {
+        repository.deleteCategory(category)
+    }
 }

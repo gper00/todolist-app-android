@@ -37,6 +37,10 @@
             android:name=".view.EditTaskActivity"
             android:exported="false"/>
 
+        <activity
+            android:name=".view.ManageCategoriesActivity"
+            android:exported="false"/>
+
     </application>
 
 </manifest>

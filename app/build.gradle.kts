@@ -37,6 +37,8 @@ dependencies {
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.11.0")
+    implementation("androidx.activity:activity-ktx:1.8.2")
+    implementation("androidx.fragment:fragment-ktx:1.6.2")
     
     // Firebase - Lowering version to match Kotlin 2.1 compiler metadata expectations
     implementation(platform("com.google.firebase:firebase-bom:33.1.0"))
