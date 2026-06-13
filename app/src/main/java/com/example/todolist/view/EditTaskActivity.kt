@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.todolist.R
 import com.example.todolist.database.AppDatabase
+import com.example.todolist.model.Category
 import com.example.todolist.viewmodel.TaskViewModel
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
@@ -29,6 +30,7 @@ class EditTaskActivity : AppCompatActivity() {
 
     private val calendar = Calendar.getInstance()
     private val viewModel: TaskViewModel by viewModels()
+    private var categoriesList: List<Category> = emptyList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,12 +54,12 @@ class EditTaskActivity : AppCompatActivity() {
 
         // Observe Categories
         viewModel.allCategories.observe(this) { categories ->
-            val categoryNames = categories.map { it.name }.toMutableList()
-            if (categoryNames.isEmpty()) categoryNames.add("General")
+            categoriesList = categories
+            val categoryNames = categories.map { it.name }
             spinnerCategory.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, categoryNames)
             
-            // Re-load task once categories are available to set selection
-            loadTask(taskId, priorityList, categoryNames)
+            // Re-load task once categories are available
+            loadTask(taskId, priorityList)
         }
 
         btnUpdate.setOnClickListener {
@@ -65,16 +67,20 @@ class EditTaskActivity : AppCompatActivity() {
         }
     }
 
-    private fun loadTask(taskId: Int, priorityList: Array<String>, categoryList: List<String>) {
+    private fun loadTask(taskId: Int, priorityList: Array<String>) {
         lifecycleScope.launch {
             val db = AppDatabase.getDatabase(this@EditTaskActivity)
-            val task = db.taskDao().getTaskById(taskId)
+            val taskWithCategory = db.taskDao().getTaskById(taskId)
+            val task = taskWithCategory.task
+            
             runOnUiThread {
                 etTitle.setText(task.title)
                 etDescription.setText(task.description)
                 etDeadline.setText(task.deadline)
                 spinnerPriority.setSelection(priorityList.indexOf(task.priority))
-                val categoryIndex = categoryList.indexOf(task.category)
+                
+                // Find index by ID
+                val categoryIndex = categoriesList.indexOfFirst { it.id == task.categoryId }
                 if (categoryIndex != -1) {
                     spinnerCategory.setSelection(categoryIndex)
                 }
@@ -87,7 +93,13 @@ class EditTaskActivity : AppCompatActivity() {
         val description = etDescription.text.toString().trim()
         val deadline = etDeadline.text.toString().trim()
         val priority = spinnerPriority.selectedItem.toString()
-        val category = spinnerCategory.selectedItem?.toString() ?: "General"
+        
+        if (categoriesList.isEmpty()) {
+            Toast.makeText(this, "Please create a category first", Toast.LENGTH_SHORT).show()
+            return
+        }
+        
+        val selectedCategory = categoriesList[spinnerCategory.selectedItemPosition]
 
         if (title.isEmpty() || description.isEmpty() || deadline.isEmpty()) {
             Toast.makeText(this, "Semua field wajib diisi", Toast.LENGTH_SHORT).show()
@@ -96,14 +108,17 @@ class EditTaskActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             val db = AppDatabase.getDatabase(this@EditTaskActivity)
-            val oldTask = db.taskDao().getTaskById(taskId)
+            val taskWithCategory = db.taskDao().getTaskById(taskId)
+            val oldTask = taskWithCategory.task
+            
             viewModel.updateTask(oldTask.copy(
                 title = title,
                 description = description,
                 deadline = deadline,
                 priority = priority,
-                category = category
+                categoryId = selectedCategory.id
             ))
+            
             runOnUiThread {
                 Toast.makeText(this@EditTaskActivity, "Task updated", Toast.LENGTH_SHORT).show()
                 finish()

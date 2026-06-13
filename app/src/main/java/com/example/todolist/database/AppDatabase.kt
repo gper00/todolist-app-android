@@ -38,24 +38,29 @@ abstract class AppDatabase : RoomDatabase() {
 
         suspend fun populateDatabase(taskDao: TaskDao, categoryDao: CategoryDao) {
             // Seed Categories
-            val categories = listOf(
-                Category(name = "Work", color = "#4285F4"),
-                Category(name = "Personal", color = "#EA4335"),
-                Category(name = "Shopping", color = "#FBBC05"),
-                Category(name = "Study", color = "#34A853")
-            )
-            categories.forEach { categoryDao.insertCategory(it) }
+            val work = Category(name = "Work", color = "#4285F4")
+            val personal = Category(name = "Personal", color = "#EA4335")
+            val shopping = Category(name = "Shopping", color = "#FBBC05")
+            val study = Category(name = "Study", color = "#34A853")
 
-            // Seed Tasks
+            categoryDao.insertCategory(work)
+            categoryDao.insertCategory(personal)
+            categoryDao.insertCategory(shopping)
+            categoryDao.insertCategory(study)
+
+            // Re-fetch categories to get IDs (auto-generated)
+            // Or just use the fact that they are 1, 2, 3, 4 if we reset everything
+            
+            // Seed Tasks with category IDs
             val tasks = listOf(
-                Task(title = "Meeting with Client", description = "Discuss project requirements", deadline = "20 June 2026", priority = "High", category = "Work"),
-                Task(title = "Buy Groceries", description = "Eggs, Milk, Bread, Fruits", deadline = "06 June 2026", priority = "Medium", category = "Shopping"),
-                Task(title = "Finish Homework", description = "Complete math exercises", deadline = "07 June 2026", priority = "High", category = "Study"),
-                Task(title = "Go for a Run", description = "5km in the park", deadline = "05 June 2026", priority = "Low", category = "Personal", isDone = true),
-                Task(title = "Read a Book", description = "Read 20 pages of 'Atomic Habits'", deadline = "08 June 2026", priority = "Medium", category = "Personal"),
-                Task(title = "Fix Bug #123", description = "Fix login crash issue", deadline = "10 June 2026", priority = "High", category = "Work"),
-                Task(title = "Clean the House", description = "Vacuum and dust all rooms", deadline = "12 June 2026", priority = "Low", category = "Personal"),
-                Task(title = "Update Portfolio", description = "Add new projects to website", deadline = "15 June 2026", priority = "Medium", category = "Work")
+                Task(title = "Meeting with Client", description = "Discuss project requirements", deadline = "20 June 2026", priority = "High", categoryId = 1),
+                Task(title = "Buy Groceries", description = "Eggs, Milk, Bread, Fruits", deadline = "06 June 2026", priority = "Medium", categoryId = 3),
+                Task(title = "Finish Homework", description = "Complete math exercises", deadline = "07 June 2026", priority = "High", categoryId = 4),
+                Task(title = "Go for a Run", description = "5km in the park", deadline = "05 June 2026", priority = "Low", categoryId = 2, isDone = true),
+                Task(title = "Read a Book", description = "Read 20 pages of 'Atomic Habits'", deadline = "08 June 2026", priority = "Medium", categoryId = 2),
+                Task(title = "Fix Bug #123", description = "Fix login crash issue", deadline = "10 June 2026", priority = "High", categoryId = 1),
+                Task(title = "Clean the House", description = "Vacuum and dust all rooms", deadline = "12 June 2026", priority = "Low", categoryId = 2),
+                Task(title = "Update Portfolio", description = "Add new projects to website", deadline = "15 June 2026", priority = "Medium", categoryId = 1)
             )
             tasks.forEach { taskDao.insertTask(it) }
         }

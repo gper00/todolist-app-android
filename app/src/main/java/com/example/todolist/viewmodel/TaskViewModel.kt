@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.todolist.database.AppDatabase
 import com.example.todolist.model.Category
 import com.example.todolist.model.Task
+import com.example.todolist.model.TaskWithCategory
 import com.example.todolist.repository.TodoRepository
 import kotlinx.coroutines.launch
 
@@ -14,7 +15,7 @@ class TaskViewModel(application: Application)
     : AndroidViewModel(application) {
 
     private val repository: TodoRepository
-    val allTasks: LiveData<List<Task>>
+    val allTasks: LiveData<List<TaskWithCategory>>
     val allCategories: LiveData<List<Category>>
 
     init {
@@ -41,7 +42,7 @@ class TaskViewModel(application: Application)
         repository.deleteTask(task)
     }
 
-    fun searchTasks(query: String): LiveData<List<Task>> {
+    fun searchTasks(query: String): LiveData<List<TaskWithCategory>> {
         return repository.searchTasks(query)
     }
 

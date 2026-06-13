@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.example.todolist.R
+import com.example.todolist.model.Category
 import com.example.todolist.model.Task
 import com.example.todolist.viewmodel.TaskViewModel
 import com.google.android.material.button.MaterialButton
@@ -27,6 +28,7 @@ class AddTaskActivity : AppCompatActivity() {
 
     private val calendar = Calendar.getInstance()
     private val viewModel: TaskViewModel by viewModels()
+    private var categoriesList: List<Category> = emptyList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,10 +49,8 @@ class AddTaskActivity : AppCompatActivity() {
 
         // Observe Categories from DB
         viewModel.allCategories.observe(this) { categories ->
-            val categoryNames = categories.map { it.name }.toMutableList()
-            if (categoryNames.isEmpty()) {
-                categoryNames.add("General") // Default if no categories exist
-            }
+            categoriesList = categories
+            val categoryNames = categories.map { it.name }
             spinnerCategory.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, categoryNames)
         }
 
@@ -59,7 +59,13 @@ class AddTaskActivity : AppCompatActivity() {
             val description = etDescription.text.toString().trim()
             val deadline = etDeadline.text.toString().trim()
             val priority = spinnerPriority.selectedItem.toString()
-            val category = spinnerCategory.selectedItem?.toString() ?: "General"
+            
+            if (categoriesList.isEmpty()) {
+                Toast.makeText(this, "Please create a category first", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val selectedCategory = categoriesList[spinnerCategory.selectedItemPosition]
 
             if (title.isEmpty() || description.isEmpty() || deadline.isEmpty()) {
                 Toast.makeText(this, "Semua field wajib diisi", Toast.LENGTH_SHORT).show()
@@ -71,7 +77,7 @@ class AddTaskActivity : AppCompatActivity() {
                 description = description,
                 deadline = deadline,
                 priority = priority,
-                category = category
+                categoryId = selectedCategory.id
             )
 
             viewModel.insertTask(task)

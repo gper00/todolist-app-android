@@ -6,6 +6,7 @@ import com.example.todolist.database.TaskDao
 import com.example.todolist.database.UserDao
 import com.example.todolist.model.Category
 import com.example.todolist.model.Task
+import com.example.todolist.model.TaskWithCategory
 import com.example.todolist.model.User
 
 class TodoRepository(
@@ -14,7 +15,7 @@ class TodoRepository(
     private val userDao: UserDao
 ) {
     // TASKS
-    val allTasks: LiveData<List<Task>> = taskDao.getAllTasks()
+    val allTasks: LiveData<List<TaskWithCategory>> = taskDao.getAllTasks()
 
     suspend fun insertTask(task: Task) {
         taskDao.insertTask(task)
@@ -28,7 +29,7 @@ class TodoRepository(
         taskDao.deleteTask(task)
     }
 
-    fun searchTasks(query: String): LiveData<List<Task>> {
+    fun searchTasks(query: String): LiveData<List<TaskWithCategory>> {
         return taskDao.searchTask(query)
     }
 

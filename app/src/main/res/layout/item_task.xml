@@ -1,102 +1,108 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="16dp"
+    android:layout_marginBottom="8dp"
     app:cardBackgroundColor="@color/card"
-    app:cardCornerRadius="24dp"
-    app:cardElevation="5dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="1dp"
     app:strokeColor="@color/border"
     app:strokeWidth="1dp">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="18dp">
+        android:padding="8dp">
 
-        <!-- TOP SECTION -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical">
+        <!-- CATEGORY COLOR INDICATOR (LEFT STRIP) -->
+        <View
+            android:id="@+id/viewCategoryColor"
+            android:layout_width="4dp"
+            android:layout_height="0dp"
+            android:background="@drawable/spinner_bg"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
-            <!-- CHECKBOX -->
-            <CheckBox
-                android:id="@+id/checkDone"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-
-            <!-- TITLE -->
-            <TextView
-                android:id="@+id/tvTitle"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Task Title"
-                android:textColor="@color/textPrimary"
-                android:textSize="18sp"
-                android:textStyle="bold"/>
-
-        </LinearLayout>
-
-        <!-- DEADLINE -->
-        <TextView
-            android:id="@+id/tvDeadline"
+        <!-- CHECKBOX -->
+        <CheckBox
+            android:id="@+id/checkDone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="12 June 2026"
-            android:textColor="@color/textSecondary"
-            android:textSize="13sp"/>
+            android:layout_marginStart="8dp"
+            app:layout_constraintStart_toEndOf="@id/viewCategoryColor"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
-        <!-- PRIORITY -->
+        <!-- TITLE -->
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:text="Task Title"
+            android:textColor="@color/textPrimary"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:ellipsize="end"
+            android:maxLines="1"
+            app:layout_constraintStart_toEndOf="@id/checkDone"
+            app:layout_constraintEnd_toStartOf="@id/tvPriority"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <!-- PRIORITY BADGE -->
         <TextView
             android:id="@+id/tvPriority"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginEnd="8dp"
             android:background="#FFF1EB"
-            android:paddingStart="14dp"
-            android:paddingTop="6dp"
-            android:paddingEnd="14dp"
-            android:paddingBottom="6dp"
-            android:text="High Priority"
+            android:paddingStart="8dp"
+            android:paddingTop="4dp"
+            android:paddingEnd="8dp"
+            android:paddingBottom="4dp"
+            android:text="High"
             android:textColor="@color/accent"
-            android:textStyle="bold"/>
+            android:textSize="11sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@id/btnOptions"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
-        <!-- BUTTON SECTION -->
-        <LinearLayout
+        <!-- OPTIONS BUTTON (THREE DOTS) -->
+        <ImageButton
+            android:id="@+id/btnOptions"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_more_vert"
+            app:tint="@color/textSecondary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <!-- HIDDEN CATEGORY NAME (Optional for searching or debugging) -->
+        <TextView
+            android:id="@+id/tvCategory"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp">
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <!-- EDIT BUTTON -->
-            <ImageButton
-                android:id="@+id/btnEdit"
-                android:layout_width="42dp"
-                android:layout_height="42dp"
-                android:layout_marginEnd="10dp"
-                android:background="#EEF2FF"
-                android:padding="8dp"
-                android:src="@android:drawable/ic_menu_edit"
-                android:tint="@color/primary"/>
+        <!-- HIDDEN DEADLINE (Keep it hidden but accessible if needed) -->
+        <TextView
+            android:id="@+id/tvDeadline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <!-- DELETE BUTTON -->
-            <ImageButton
-                android:id="@+id/btnDelete"
-                android:layout_width="42dp"
-                android:layout_height="42dp"
-                android:background="#FFF1F0"
-                android:padding="8dp"
-                android:src="@android:drawable/ic_menu_delete"
-                android:tint="#E53935"/>
-
-        </LinearLayout>
-
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </com.google.android.material.card.MaterialCardView>
