@@ -49,7 +49,16 @@ class ManageCategoriesActivity : AppCompatActivity() {
         adapter = CategoryAdapter(
             emptyList(),
             onEdit = { category -> showCategoryDialog(category) },
-            onDelete = { category -> viewModel.deleteCategory(category) }
+            onDelete = { category ->
+                AlertDialog.Builder(this)
+                    .setTitle("Delete Category")
+                    .setMessage("Are you sure you want to delete '${category.name}'? Tasks in this category will not be deleted.")
+                    .setPositiveButton("Delete") { _, _ ->
+                        viewModel.deleteCategory(category)
+                    }
+                    .setNegativeButton("Cancel", null)
+                    .show()
+            }
         )
         rvCategories.layoutManager = LinearLayoutManager(this)
         rvCategories.adapter = adapter
@@ -65,13 +74,54 @@ class ManageCategoriesActivity : AppCompatActivity() {
     private fun showCategoryDialog(category: Category?) {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_add_category, null)
         val etName = dialogView.findViewById<EditText>(R.id.etCategoryName)
-        val etColor = dialogView.findViewById<EditText>(R.id.etCategoryColor)
+        val colorGrid = dialogView.findViewById<android.widget.GridLayout>(R.id.colorGrid)
+        
+        var selectedColor = category?.color ?: "#6C63FF"
+
+        val colors = listOf(
+            "#FF5252", "#FF4081", "#7C4DFF", "#9C27B0", "#3F51B5", "#2196F3",
+            "#00BCD4", "#009688", "#4CAF50", "#FF9800", "#795548", "#9E9E9E",
+            "#6C63FF", "#E91E63", "#000000", "#FFC107", "#8BC34A", "#607D8B"
+        )
+
+        colors.forEach { colorStr ->
+            val view = View(this)
+            val params = android.widget.GridLayout.LayoutParams()
+            params.width = 100
+            params.height = 100
+            params.setMargins(10, 10, 10, 10)
+            view.layoutParams = params
+            
+            val drawable = android.graphics.drawable.GradientDrawable()
+            drawable.shape = android.graphics.drawable.GradientDrawable.OVAL
+            drawable.setColor(android.graphics.Color.parseColor(colorStr))
+            
+            // Highlight selected
+            if (colorStr == selectedColor) {
+                drawable.setStroke(6, android.graphics.Color.DKGRAY)
+            } else {
+                drawable.setStroke(0, android.graphics.Color.TRANSPARENT)
+            }
+            
+            view.background = drawable
+            view.setOnClickListener {
+                selectedColor = colorStr
+                // Refresh highlight
+                for (i in 0 until colorGrid.childCount) {
+                    val child = colorGrid.getChildAt(i)
+                    val childDrawable = child.background as android.graphics.drawable.GradientDrawable
+                    if (colors[i] == selectedColor) {
+                        childDrawable.setStroke(6, android.graphics.Color.DKGRAY)
+                    } else {
+                        childDrawable.setStroke(0, android.graphics.Color.TRANSPARENT)
+                    }
+                }
+            }
+            colorGrid.addView(view)
+        }
 
         if (category != null) {
             etName.setText(category.name)
-            etColor.setText(category.color)
-        } else {
-            etColor.setText("#6C63FF") // Default color
         }
 
         AlertDialog.Builder(this)
@@ -79,16 +129,15 @@ class ManageCategoriesActivity : AppCompatActivity() {
             .setView(dialogView)
             .setPositiveButton("Save") { _, _ ->
                 val name = etName.text.toString().trim()
-                val color = etColor.text.toString().trim()
 
-                if (name.isNotEmpty() && color.isNotEmpty()) {
+                if (name.isNotEmpty()) {
                     if (category == null) {
-                        viewModel.insertCategory(Category(name = name, color = color))
+                        viewModel.insertCategory(Category(name = name, color = selectedColor))
                     } else {
-                        viewModel.updateCategory(category.copy(name = name, color = color))
+                        viewModel.updateCategory(category.copy(name = name, color = selectedColor))
                     }
                 } else {
-                    Toast.makeText(this, "Fields cannot be empty", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Name cannot be empty", Toast.LENGTH_SHORT).show()
                 }
             }
             .setNegativeButton("Cancel", null)

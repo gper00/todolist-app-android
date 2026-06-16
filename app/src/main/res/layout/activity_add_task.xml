@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -34,66 +33,59 @@
 
         <!-- TASK TITLE -->
         <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:boxBackgroundMode="filled"
-            app:boxBackgroundColor="@color/card"
             app:boxCornerRadiusTopStart="20dp"
             app:boxCornerRadiusTopEnd="20dp"
             app:boxCornerRadiusBottomStart="20dp"
-            app:boxCornerRadiusBottomEnd="20dp">
+            app:boxCornerRadiusBottomEnd="20dp"
+            app:boxStrokeColor="@color/primary"
+            app:hintTextColor="@color/primary">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Task title"
-                android:textColor="@color/textPrimary"
-                android:textColorHint="@color/textSecondary"/>
+                android:hint="Task title (Required)"
+                android:textColor="@color/textPrimary"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- DESCRIPTION -->
         <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="18dp"
-            app:boxBackgroundMode="filled"
-            app:boxBackgroundColor="@color/card"
             app:boxCornerRadiusTopStart="20dp"
             app:boxCornerRadiusTopEnd="20dp"
             app:boxCornerRadiusBottomStart="20dp"
-            app:boxCornerRadiusBottomEnd="20dp">
+            app:boxCornerRadiusBottomEnd="20dp"
+            app:boxStrokeColor="@color/primary"
+            app:hintTextColor="@color/primary">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etDescription"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Description"
+                android:hint="Description (Optional)"
                 android:minLines="3"
                 android:gravity="top"
-                android:textColor="@color/textPrimary"
-                android:textColorHint="@color/textSecondary"/>
+                android:textColor="@color/textPrimary"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- DEADLINE -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Deadline"
-            android:textColor="@color/textPrimary"
-            android:textStyle="bold"
-            android:layout_marginTop="22dp"
-            android:layout_marginBottom="8dp"/>
-
         <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:boxBackgroundMode="filled"
-            app:boxBackgroundColor="@color/card"
+            android:layout_marginTop="18dp"
             app:boxCornerRadiusTopStart="20dp"
             app:boxCornerRadiusTopEnd="20dp"
             app:boxCornerRadiusBottomStart="20dp"
             app:boxCornerRadiusBottomEnd="20dp"
+            app:boxStrokeColor="@color/primary"
+            app:hintTextColor="@color/primary"
             app:endIconMode="custom"
             app:endIconDrawable="@android:drawable/ic_menu_my_calendar">
 
@@ -101,48 +93,61 @@
                 android:id="@+id/etDeadline"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Select date"
+                android:hint="Deadline (Optional)"
                 android:focusable="false"
                 android:clickable="true"
-                android:textColor="@color/textPrimary"
-                android:textColorHint="@color/textSecondary"/>
+                android:textColor="@color/textPrimary"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- PRIORITY -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Priority"
-            android:textColor="@color/textPrimary"
-            android:textStyle="bold"
-            android:layout_marginTop="22dp"
-            android:layout_marginBottom="8dp"/>
-
-        <Spinner
-            android:id="@+id/spinnerPriority"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/menuPriority"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
             android:layout_width="match_parent"
-            android:layout_height="55dp"
-            android:background="@drawable/spinner_bg"
-            android:paddingStart="14dp"
-            android:paddingEnd="14dp"/>
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            app:boxCornerRadiusTopStart="20dp"
+            app:boxCornerRadiusTopEnd="20dp"
+            app:boxCornerRadiusBottomStart="20dp"
+            app:boxCornerRadiusBottomEnd="20dp"
+            app:boxStrokeColor="@color/primary"
+            app:hintTextColor="@color/primary">
+
+            <AutoCompleteTextView
+                android:id="@+id/autoCompletePriority"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Priority (Optional)"
+                android:inputType="none"
+                android:textColor="@color/textPrimary"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp"/>
+        </com.google.android.material.textfield.TextInputLayout>
 
         <!-- CATEGORY -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Category"
-            android:textColor="@color/textPrimary"
-            android:textStyle="bold"
-            android:layout_marginTop="22dp"
-            android:layout_marginBottom="8dp"/>
-
-        <Spinner
-            android:id="@+id/spinnerCategory"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/menuCategory"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
             android:layout_width="match_parent"
-            android:layout_height="55dp"
-            android:background="@drawable/spinner_bg"
-            android:paddingStart="14dp"
-            android:paddingEnd="14dp"/>
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            app:boxCornerRadiusTopStart="20dp"
+            app:boxCornerRadiusTopEnd="20dp"
+            app:boxCornerRadiusBottomStart="20dp"
+            app:boxCornerRadiusBottomEnd="20dp"
+            app:boxStrokeColor="@color/primary"
+            app:hintTextColor="@color/primary">
+
+            <AutoCompleteTextView
+                android:id="@+id/autoCompleteCategory"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Category (Optional)"
+                android:inputType="none"
+                android:textColor="@color/textPrimary"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp"/>
+        </com.google.android.material.textfield.TextInputLayout>
 
         <!-- BUTTON -->
         <com.google.android.material.button.MaterialButton

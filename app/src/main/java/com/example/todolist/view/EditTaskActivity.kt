@@ -3,7 +3,7 @@ package com.example.todolist.view
 import android.app.DatePickerDialog
 import android.os.Bundle
 import android.widget.ArrayAdapter
-import android.widget.Spinner
+import android.widget.AutoCompleteTextView
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -24,8 +24,8 @@ class EditTaskActivity : AppCompatActivity() {
     private lateinit var etTitle: TextInputEditText
     private lateinit var etDescription: TextInputEditText
     private lateinit var etDeadline: TextInputEditText
-    private lateinit var spinnerPriority: Spinner
-    private lateinit var spinnerCategory: Spinner
+    private lateinit var autoCompletePriority: AutoCompleteTextView
+    private lateinit var autoCompleteCategory: AutoCompleteTextView
     private lateinit var btnUpdate: MaterialButton
 
     private val calendar = Calendar.getInstance()
@@ -39,8 +39,8 @@ class EditTaskActivity : AppCompatActivity() {
         etTitle = findViewById(R.id.etTitle)
         etDescription = findViewById(R.id.etDescription)
         etDeadline = findViewById(R.id.etDeadline)
-        spinnerPriority = findViewById(R.id.spinnerPriority)
-        spinnerCategory = findViewById(R.id.spinnerCategory)
+        autoCompletePriority = findViewById(R.id.autoCompletePriority)
+        autoCompleteCategory = findViewById(R.id.autoCompleteCategory)
         btnUpdate = findViewById(R.id.btnUpdate)
 
         val taskId = intent.getIntExtra("taskId", 0)
@@ -50,16 +50,16 @@ class EditTaskActivity : AppCompatActivity() {
 
         // Priority List
         val priorityList = arrayOf("Low", "Medium", "High")
-        spinnerPriority.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, priorityList)
+        autoCompletePriority.setAdapter(ArrayAdapter(this, android.R.layout.simple_list_item_1, priorityList))
 
         // Observe Categories
         viewModel.allCategories.observe(this) { categories ->
             categoriesList = categories
             val categoryNames = categories.map { it.name }
-            spinnerCategory.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, categoryNames)
+            autoCompleteCategory.setAdapter(ArrayAdapter(this, android.R.layout.simple_list_item_1, categoryNames))
             
             // Re-load task once categories are available
-            loadTask(taskId, priorityList)
+            loadTask(taskId)
         }
 
         btnUpdate.setOnClickListener {
@@ -67,22 +67,20 @@ class EditTaskActivity : AppCompatActivity() {
         }
     }
 
-    private fun loadTask(taskId: Int, priorityList: Array<String>) {
+    private fun loadTask(taskId: Int) {
         lifecycleScope.launch {
             val db = AppDatabase.getDatabase(this@EditTaskActivity)
             val taskWithCategory = db.taskDao().getTaskById(taskId)
             val task = taskWithCategory.task
+            val category = taskWithCategory.category
             
             runOnUiThread {
                 etTitle.setText(task.title)
                 etDescription.setText(task.description)
                 etDeadline.setText(task.deadline)
-                spinnerPriority.setSelection(priorityList.indexOf(task.priority))
-                
-                // Find index by ID
-                val categoryIndex = categoriesList.indexOfFirst { it.id == task.categoryId }
-                if (categoryIndex != -1) {
-                    spinnerCategory.setSelection(categoryIndex)
+                autoCompletePriority.setText(task.priority, false)
+                category?.let {
+                    autoCompleteCategory.setText(it.name, false)
                 }
             }
         }
@@ -92,19 +90,15 @@ class EditTaskActivity : AppCompatActivity() {
         val title = etTitle.text.toString().trim()
         val description = etDescription.text.toString().trim()
         val deadline = etDeadline.text.toString().trim()
-        val priority = spinnerPriority.selectedItem.toString()
-        
-        if (categoriesList.isEmpty()) {
-            Toast.makeText(this, "Please create a category first", Toast.LENGTH_SHORT).show()
-            return
-        }
-        
-        val selectedCategory = categoriesList[spinnerCategory.selectedItemPosition]
+        val priority = autoCompletePriority.text.toString().trim()
+        val categoryName = autoCompleteCategory.text.toString().trim()
 
-        if (title.isEmpty() || description.isEmpty() || deadline.isEmpty()) {
-            Toast.makeText(this, "Semua field wajib diisi", Toast.LENGTH_SHORT).show()
+        if (title.isEmpty()) {
+            etTitle.error = "Task title is required"
             return
         }
+
+        val selectedCategory = categoriesList.find { it.name == categoryName }
 
         lifecycleScope.launch {
             val db = AppDatabase.getDatabase(this@EditTaskActivity)
@@ -116,7 +110,7 @@ class EditTaskActivity : AppCompatActivity() {
                 description = description,
                 deadline = deadline,
                 priority = priority,
-                categoryId = selectedCategory.id
+                categoryId = selectedCategory?.id
             ))
             
             runOnUiThread {

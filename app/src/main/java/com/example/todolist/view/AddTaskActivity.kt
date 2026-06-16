@@ -3,7 +3,7 @@ package com.example.todolist.view
 import android.app.DatePickerDialog
 import android.os.Bundle
 import android.widget.ArrayAdapter
-import android.widget.Spinner
+import android.widget.AutoCompleteTextView
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -22,8 +22,8 @@ class AddTaskActivity : AppCompatActivity() {
     private lateinit var etTitle: TextInputEditText
     private lateinit var etDescription: TextInputEditText
     private lateinit var etDeadline: TextInputEditText
-    private lateinit var spinnerPriority: Spinner
-    private lateinit var spinnerCategory: Spinner
+    private lateinit var autoCompletePriority: AutoCompleteTextView
+    private lateinit var autoCompleteCategory: AutoCompleteTextView
     private lateinit var btnSave: MaterialButton
 
     private val calendar = Calendar.getInstance()
@@ -37,51 +37,49 @@ class AddTaskActivity : AppCompatActivity() {
         etTitle = findViewById(R.id.etTitle)
         etDescription = findViewById(R.id.etDescription)
         etDeadline = findViewById(R.id.etDeadline)
-        spinnerPriority = findViewById(R.id.spinnerPriority)
-        spinnerCategory = findViewById(R.id.spinnerCategory)
+        autoCompletePriority = findViewById(R.id.autoCompletePriority)
+        autoCompleteCategory = findViewById(R.id.autoCompleteCategory)
         btnSave = findViewById(R.id.btnSave)
 
         etDeadline.setOnClickListener { showDatePicker() }
 
         // Priority List
         val priorityList = arrayOf("Low", "Medium", "High")
-        spinnerPriority.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, priorityList)
+        autoCompletePriority.setAdapter(ArrayAdapter(this, android.R.layout.simple_list_item_1, priorityList))
 
         // Observe Categories from DB
         viewModel.allCategories.observe(this) { categories ->
             categoriesList = categories
             val categoryNames = categories.map { it.name }
-            spinnerCategory.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, categoryNames)
+            autoCompleteCategory.setAdapter(ArrayAdapter(this, android.R.layout.simple_list_item_1, categoryNames))
         }
 
         btnSave.setOnClickListener {
             val title = etTitle.text.toString().trim()
             val description = etDescription.text.toString().trim()
             val deadline = etDeadline.text.toString().trim()
-            val priority = spinnerPriority.selectedItem.toString()
+            val priority = autoCompletePriority.text.toString().trim()
             
-            if (categoriesList.isEmpty()) {
-                Toast.makeText(this, "Please create a category first", Toast.LENGTH_SHORT).show()
+            // Validate Title (Only required field)
+            if (title.isEmpty()) {
+                etTitle.error = "Task title is required"
                 return@setOnClickListener
             }
 
-            val selectedCategory = categoriesList[spinnerCategory.selectedItemPosition]
-
-            if (title.isEmpty() || description.isEmpty() || deadline.isEmpty()) {
-                Toast.makeText(this, "Semua field wajib diisi", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
+            // Find selected category ID if any
+            val categoryName = autoCompleteCategory.text.toString()
+            val selectedCategory = categoriesList.find { it.name == categoryName }
 
             val task = Task(
                 title = title,
                 description = description,
                 deadline = deadline,
                 priority = priority,
-                categoryId = selectedCategory.id
+                categoryId = selectedCategory?.id
             )
 
             viewModel.insertTask(task)
-            Toast.makeText(this, "Task berhasil ditambahkan", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Task added successfully", Toast.LENGTH_SHORT).show()
             finish()
         }
     }

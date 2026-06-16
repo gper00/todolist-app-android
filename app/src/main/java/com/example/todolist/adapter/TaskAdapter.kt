@@ -1,5 +1,6 @@
 package com.example.todolist.adapter
 
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.view.LayoutInflater
@@ -13,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.todolist.R
 import com.example.todolist.model.Task
 import com.example.todolist.model.TaskWithCategory
+import com.example.todolist.view.TaskDetailActivity
 
 class TaskAdapter(
     private var taskList: List<TaskWithCategory>,
@@ -42,9 +44,16 @@ class TaskAdapter(
         val category = taskWithCategory.category
 
         holder.tvTitle.text = task.title
-        holder.tvPriority.text = task.priority
+        
+        // Handle Priority Visibility
+        if (task.priority.isNotEmpty()) {
+            holder.tvPriority.visibility = View.VISIBLE
+            holder.tvPriority.text = task.priority
+        } else {
+            holder.tvPriority.visibility = View.GONE
+        }
 
-        // Fix CheckBox recycling bug: detach listener before setting isChecked
+        // Fix CheckBox recycling bug
         holder.checkDone.setOnCheckedChangeListener(null)
         holder.checkDone.isChecked = task.isDone
 
@@ -52,11 +61,19 @@ class TaskAdapter(
         val drawable = GradientDrawable()
         drawable.shape = GradientDrawable.RECTANGLE
         try {
-            drawable.setColor(Color.parseColor(category?.color ?: "#666666"))
+            val colorStr = category?.color ?: "#E0E0E0" // Default light gray if no category
+            drawable.setColor(Color.parseColor(colorStr))
         } catch (e: Exception) {
-            drawable.setColor(Color.GRAY)
+            drawable.setColor(Color.LTGRAY)
         }
         holder.viewCategoryColor.background = drawable
+
+        // Navigate to Details on Click
+        holder.itemView.setOnClickListener {
+            val intent = Intent(it.context, TaskDetailActivity::class.java)
+            intent.putExtra("taskId", task.id)
+            it.context.startActivity(intent)
+        }
 
         // Options Menu
         holder.btnOptions.setOnClickListener { view ->
@@ -73,7 +90,7 @@ class TaskAdapter(
             popup.show()
         }
 
-        // Re-attach listener after setting the checked state
+        // Re-attach listener
         holder.checkDone.setOnCheckedChangeListener { _, isChecked ->
             onChecked(task, isChecked)
         }

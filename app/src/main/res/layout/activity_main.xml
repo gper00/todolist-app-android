@@ -17,6 +17,7 @@
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigation"
+        style="@style/Widget.App.BottomNavigationView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="@color/card"
@@ -26,6 +27,6 @@
         app:menu="@menu/bottom_nav_menu"
         app:itemIconTint="@color/primary"
         app:itemTextColor="@color/primary"
-        app:labelVisibilityMode="labeled" />
+        app:labelVisibilityMode="unlabeled" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

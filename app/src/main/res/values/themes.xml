@@ -1,13 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources xmlns:tools="http://schemas.android.com/apk/res/android">
 
     <style
         name="Theme.ToDoList"
         parent="Theme.Material3.DayNight.NoActionBar">
 
         <item name="colorPrimary">@color/primary</item>
+        <item name="android:textColorHint">@color/textSecondary</item>
 
+    </style>
+
+    <style name="CalendarTheme" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorOnSurface">@color/textPrimary</item>
+        <item name="colorOnPrimary">@android:color/white</item>
+        <item name="colorPrimary">@color/primary</item>
+    </style>
+
+    <style name="Widget.App.BottomNavigationView" parent="Widget.Material3.BottomNavigationView">
+        <item name="itemActiveIndicatorStyle">@style/App.Custom.Indicator</item>
+        <item name="android:paddingTop">0dp</item>
+        <item name="android:paddingBottom">0dp</item>
+        <item name="paddingBottomSystemWindowInsets">false</item>
+    </style>
+
+    <style name="App.Custom.Indicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
+        <item name="android:color">#EEF2FF</item> <!-- Light blue/primary color for indicator -->
     </style>
 
 </resources>

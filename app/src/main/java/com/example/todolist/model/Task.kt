@@ -12,7 +12,7 @@ import androidx.room.PrimaryKey
             entity = Category::class,
             parentColumns = ["id"],
             childColumns = ["categoryId"],
-            onDelete = ForeignKey.SET_DEFAULT // Or CASCADE
+            onDelete = ForeignKey.SET_NULL // Changed from SET_DEFAULT/CASCADE
         )
     ],
     indices = [Index("categoryId")]
@@ -22,9 +22,9 @@ data class Task(
     val id: Int = 0,
 
     val title: String,
-    val description: String,
-    val deadline: String,
-    val priority: String,
-    val categoryId: Int, // Changed from category: String
+    val description: String = "", // Added default value
+    val deadline: String = "",    // Added default value
+    val priority: String = "",    // Added default value
+    val categoryId: Int? = null,  // Changed to nullable Int?
     val isDone: Boolean = false
 )

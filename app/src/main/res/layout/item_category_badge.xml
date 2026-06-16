@@ -2,14 +2,14 @@
 <com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cardBadge"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_marginEnd="8dp"
     app:cardCornerRadius="20dp"
     app:cardElevation="0dp"
-    app:strokeWidth="1dp"
-    app:strokeColor="@color/border"
-    app:cardBackgroundColor="@color/card">
+    app:strokeWidth="0dp"
+    app:cardBackgroundColor="@color/primary">
 
     <TextView
         android:id="@+id/tvBadgeName"
@@ -20,7 +20,7 @@
         android:paddingEnd="12dp"
         android:paddingBottom="6dp"
         android:text="Category"
-        android:textColor="@color/textPrimary"
+        android:textColor="@android:color/white"
         android:textSize="12sp"
         android:textStyle="bold" />
 

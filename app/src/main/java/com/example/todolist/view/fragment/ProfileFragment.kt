@@ -11,7 +11,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.example.todolist.R
 import com.example.todolist.view.LoginActivity
-import com.example.todolist.view.ManageCategoriesActivity
 import com.example.todolist.viewmodel.TaskViewModel
 import com.google.android.material.button.MaterialButton
 import com.google.firebase.auth.FirebaseAuth
@@ -32,7 +31,6 @@ class ProfileFragment : Fragment() {
         val tvEmail = view.findViewById<TextView>(R.id.tvProfileEmail)
         val tvTotalTasks = view.findViewById<TextView>(R.id.tvTotalTasks)
         val tvCompletedTasks = view.findViewById<TextView>(R.id.tvCompletedTasks)
-        val btnManageCategories = view.findViewById<MaterialButton>(R.id.btnManageCategories)
         val btnLogout = view.findViewById<MaterialButton>(R.id.btnLogout)
 
         tvEmail.text = auth.currentUser?.email ?: "No email"
@@ -42,10 +40,6 @@ class ProfileFragment : Fragment() {
             tvTotalTasks.text = tasks.size.toString()
             val completedCount = tasks.count { it.task.isDone }
             tvCompletedTasks.text = completedCount.toString()
-        }
-
-        btnManageCategories.setOnClickListener {
-            startActivity(Intent(requireContext(), ManageCategoriesActivity::class.java))
         }
 
         btnLogout.setOnClickListener {

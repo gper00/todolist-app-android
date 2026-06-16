@@ -16,6 +16,7 @@ class CategoryBadgeAdapter(
 
     class BadgeViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvBadge: TextView = itemView.findViewById(R.id.tvBadgeName)
+        val cardBadge: com.google.android.material.card.MaterialCardView = itemView.findViewById(R.id.cardBadge)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BadgeViewHolder {
@@ -27,9 +28,15 @@ class CategoryBadgeAdapter(
         val category = categories[position]
         holder.tvBadge.text = category.name
         try {
-            holder.tvBadge.setTextColor(Color.parseColor(category.color))
+            val color = Color.parseColor(category.color)
+            holder.cardBadge.setCardBackgroundColor(color)
+            
+            // Dynamic text color for contrast
+            val darkness = 1 - (0.299 * Color.red(color) + 0.587 * Color.green(color) + 0.114 * Color.blue(color)) / 255
+            holder.tvBadge.setTextColor(if (darkness < 0.5) Color.BLACK else Color.WHITE)
         } catch (e: Exception) {
-            holder.tvBadge.setTextColor(Color.BLACK)
+            holder.cardBadge.setCardBackgroundColor(Color.GRAY)
+            holder.tvBadge.setTextColor(Color.WHITE)
         }
         
         holder.itemView.setOnClickListener { onClick(category) }
