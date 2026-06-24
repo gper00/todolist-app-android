@@ -33,6 +33,22 @@ class TodoRepository(
         return taskDao.searchTask(query)
     }
 
+    fun getTasksByCategory(categoryId: Int): LiveData<List<TaskWithCategory>> {
+        return taskDao.getTasksByCategory(categoryId)
+    }
+
+    fun getTasksByPriority(priority: String): LiveData<List<TaskWithCategory>> {
+        return taskDao.getTasksByPriority(priority)
+    }
+
+    fun getTasksByCategoryAndPriority(categoryId: Int, priority: String): LiveData<List<TaskWithCategory>> {
+        return taskDao.getTasksByCategoryAndPriority(categoryId, priority)
+    }
+
+    suspend fun deleteAllCompletedTasks() {
+        taskDao.deleteAllCompletedTasks()
+    }
+
     // CATEGORIES
     val allCategories: LiveData<List<Category>> = categoryDao.getAllCategories()
 

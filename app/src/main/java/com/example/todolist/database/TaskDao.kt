@@ -33,4 +33,19 @@ interface TaskDao {
     @Transaction
     @Query("SELECT * FROM tasks WHERE title LIKE '%' || :search || '%'")
     fun searchTask(search: String): LiveData<List<TaskWithCategory>>
+
+    @Transaction
+    @Query("SELECT * FROM tasks WHERE categoryId = :categoryId")
+    fun getTasksByCategory(categoryId: Int): LiveData<List<TaskWithCategory>>
+
+    @Transaction
+    @Query("SELECT * FROM tasks WHERE priority = :priority")
+    fun getTasksByPriority(priority: String): LiveData<List<TaskWithCategory>>
+
+    @Transaction
+    @Query("SELECT * FROM tasks WHERE categoryId = :categoryId AND priority = :priority")
+    fun getTasksByCategoryAndPriority(categoryId: Int, priority: String): LiveData<List<TaskWithCategory>>
+
+    @Query("DELETE FROM tasks WHERE isDone = 1")
+    suspend fun deleteAllCompletedTasks()
 }

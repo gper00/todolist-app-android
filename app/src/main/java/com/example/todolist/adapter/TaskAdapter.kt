@@ -1,5 +1,6 @@
 package com.example.todolist.adapter
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
@@ -15,12 +16,15 @@ import com.example.todolist.R
 import com.example.todolist.model.Task
 import com.example.todolist.model.TaskWithCategory
 import com.example.todolist.view.TaskDetailActivity
+import com.google.android.material.snackbar.Snackbar
 
 class TaskAdapter(
+    private val context: Context,
     private var taskList: List<TaskWithCategory>,
     private val onDelete: (Task) -> Unit,
     private val onEdit: (Task) -> Unit,
-    private val onChecked: (Task, Boolean) -> Unit
+    private val onChecked: (Task, Boolean) -> Unit,
+    private val onUndo: (Task) -> Unit
 ) : RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
 
     class TaskViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -83,7 +87,10 @@ class TaskAdapter(
             popup.setOnMenuItemClickListener { item ->
                 when (item.title) {
                     "Edit" -> onEdit(task)
-                    "Delete" -> onDelete(task)
+                    "Delete" -> {
+                        onDelete(task)
+                        showUndoSnackbar(task, holder.itemView)
+                    }
                 }
                 true
             }
@@ -99,5 +106,13 @@ class TaskAdapter(
     fun setData(newList: List<TaskWithCategory>) {
         taskList = newList
         notifyDataSetChanged()
+    }
+
+    private fun showUndoSnackbar(task: Task, view: View) {
+        Snackbar.make(view, "Task deleted", Snackbar.LENGTH_LONG)
+            .setAction("Undo") {
+                onUndo(task)
+            }
+            .show()
     }
 }

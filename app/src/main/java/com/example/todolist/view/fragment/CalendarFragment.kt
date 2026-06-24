@@ -70,6 +70,7 @@ class CalendarFragment : Fragment() {
 
     private fun setupRecyclerView() {
         adapter = TaskAdapter(
+            requireContext(),
             emptyList(),
             onDelete = { task -> viewModel.deleteTask(task) },
             onEdit = { task ->
@@ -79,7 +80,8 @@ class CalendarFragment : Fragment() {
             },
             onChecked = { task, isChecked ->
                 viewModel.updateTask(task.copy(isDone = isChecked))
-            }
+            },
+            onUndo = { task -> viewModel.insertTask(task) }
         )
         rvTasks.layoutManager = LinearLayoutManager(requireContext())
         rvTasks.adapter = adapter

@@ -46,6 +46,22 @@ class TaskViewModel(application: Application)
         return repository.searchTasks(query)
     }
 
+    fun getTasksByCategory(categoryId: Int): LiveData<List<TaskWithCategory>> {
+        return repository.getTasksByCategory(categoryId)
+    }
+
+    fun getTasksByPriority(priority: String): LiveData<List<TaskWithCategory>> {
+        return repository.getTasksByPriority(priority)
+    }
+
+    fun getTasksByCategoryAndPriority(categoryId: Int, priority: String): LiveData<List<TaskWithCategory>> {
+        return repository.getTasksByCategoryAndPriority(categoryId, priority)
+    }
+
+    fun deleteAllCompletedTasks() = viewModelScope.launch {
+        repository.deleteAllCompletedTasks()
+    }
+
     // CATEGORIES
     fun insertCategory(category: Category) = viewModelScope.launch {
         repository.insertCategory(category)
