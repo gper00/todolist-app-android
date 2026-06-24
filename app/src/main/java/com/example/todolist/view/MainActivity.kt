@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.example.todolist.R
+import com.example.todolist.utils.ThemeStorage
 import com.example.todolist.view.fragment.CalendarFragment
 import com.example.todolist.view.fragment.HomeFragment
 import com.example.todolist.view.fragment.ProfileFragment
@@ -12,8 +13,12 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 class MainActivity : AppCompatActivity() {
 
     private lateinit var bottomNavigation: BottomNavigationView
+    private lateinit var themeStorage: ThemeStorage
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        themeStorage = ThemeStorage(this)
+        setTheme(themeStorage.getThemeResource())
+        
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
@@ -47,5 +52,10 @@ class MainActivity : AppCompatActivity() {
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragmentContainer, fragment)
             .commit()
+    }
+    
+    fun restartActivity() {
+        finish()
+        startActivity(intent)
     }
 }

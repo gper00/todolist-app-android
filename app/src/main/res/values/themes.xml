@@ -1,14 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <resources xmlns:tools="http://schemas.android.com/apk/res/android">
 
-    <style
-        name="Theme.ToDoList"
-        parent="Theme.Material3.DayNight.NoActionBar">
-
+    <style name="Theme.ToDoList" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="colorPrimary">@color/primary</item>
         <item name="android:textColorHint">@color/textSecondary</item>
+    </style>
 
+    <style name="Theme.ToDoList.Blue" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/primary_blue</item>
+        <item name="android:textColorHint">@color/textSecondary</item>
+    </style>
+
+    <style name="Theme.ToDoList.Green" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/primary_green</item>
+        <item name="android:textColorHint">@color/textSecondary</item>
+    </style>
+
+    <style name="Theme.ToDoList.Pink" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/primary_pink</item>
+        <item name="android:textColorHint">@color/textSecondary</item>
     </style>
 
     <style name="CalendarTheme" parent="Theme.Material3.DayNight.NoActionBar">
@@ -25,7 +35,7 @@
     </style>
 
     <style name="App.Custom.Indicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
-        <item name="android:color">#EEF2FF</item> <!-- Light blue/primary color for indicator -->
+        <item name="android:color">#EEF2FF</item>
     </style>
 
 </resources>

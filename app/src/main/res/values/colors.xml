@@ -1,19 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <resources>
-
+    <!-- Purple (Default) -->
     <color name="primary">#6C63FF</color>
+    <color name="primary_light">#EEF2FF</color>
+
+    <!-- Blue -->
+    <color name="primary_blue">#2196F3</color>
+    <color name="primary_blue_light">#E3F2FD</color>
+
+    <!-- Green -->
+    <color name="primary_green">#4CAF50</color>
+    <color name="primary_green_light">#E8F5E9</color>
+
+    <!-- Pink -->
+    <color name="primary_pink">#E91E63</color>
+    <color name="primary_pink_light">#FCE4EC</color>
 
     <color name="background">#F6F7FB</color>
-
     <color name="card">#FFFFFF</color>
-
     <color name="textPrimary">#222222</color>
-
     <color name="textSecondary">#777777</color>
-
     <color name="accent">#FF7043</color>
-
     <color name="border">#E0E0E0</color>
-
 </resources>

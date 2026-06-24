@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -33,6 +34,11 @@ class CalendarFragment : Fragment() {
     private lateinit var adapter: TaskAdapter
     private lateinit var tvSelectedDate: TextView
     private lateinit var btnAddTask: FloatingActionButton
+    private lateinit var pbCalendarProgress: ProgressBar
+    private lateinit var tvCalendarProgressStatus: TextView
+    private lateinit var tvCalendarProgressEmoji: TextView
+    private lateinit var tvCalendarMotivationalMsg: TextView
+    private lateinit var tvProgressPercent: TextView
 
     private val viewModel: TaskViewModel by viewModels()
     private val sdf = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
@@ -47,6 +53,11 @@ class CalendarFragment : Fragment() {
         rvTasks = view.findViewById(R.id.rvCalendarTasks)
         tvSelectedDate = view.findViewById(R.id.tvSelectedDate)
         btnAddTask = view.findViewById(R.id.btnAddTaskCalendar)
+        pbCalendarProgress = view.findViewById(R.id.pbCalendarProgress)
+        tvCalendarProgressStatus = view.findViewById(R.id.tvCalendarProgressStatus)
+        tvCalendarProgressEmoji = view.findViewById(R.id.tvCalendarProgressEmoji)
+        tvCalendarMotivationalMsg = view.findViewById(R.id.tvCalendarMotivationalMsg)
+        tvProgressPercent = view.findViewById(R.id.tvProgressPercent)
 
         setupRecyclerView()
 
@@ -111,12 +122,57 @@ class CalendarFragment : Fragment() {
     }
 
     private fun updateTasksForDate(date: CalendarDay) {
-        val dateString = sdf.format(date.date) // CalendarDay.getDate() returns java.util.Date in 1.4.3
+        val dateString = sdf.format(date.date)
         tvSelectedDate.text = "Tasks for $dateString"
 
         viewModel.allTasks.observe(viewLifecycleOwner) { tasks ->
             val filteredTasks = tasks.filter { it.task.deadline == dateString }
             adapter.setData(filteredTasks)
+            
+            // Update Progress
+            val total = filteredTasks.size
+            val completed = filteredTasks.count { it.task.isDone }
+            
+            if (total > 0) {
+                val progress = (completed.toFloat() / total.toFloat() * 100).toInt()
+                pbCalendarProgress.progress = progress
+                tvProgressPercent.text = "$progress%"
+                tvCalendarProgressStatus.text = "$completed dari $total tugas selesai"
+                
+                // Update Emoji and Motivation
+                updateProgressUI(progress)
+            } else {
+                pbCalendarProgress.progress = 0
+                tvProgressPercent.text = "0%"
+                tvCalendarProgressStatus.text = "Tidak ada tugas"
+                tvCalendarProgressEmoji.text = "😴"
+                tvCalendarMotivationalMsg.text = "Ayo mulai selesaikan tugasmu!"
+            }
+        }
+    }
+
+    private fun updateProgressUI(progress: Int) {
+        when {
+            progress >= 100 -> {
+                tvCalendarProgressEmoji.text = "🎉"
+                tvCalendarMotivationalMsg.text = "Hebat! Semua tugas selesai!"
+            }
+            progress >= 76 -> {
+                tvCalendarProgressEmoji.text = "🚀"
+                tvCalendarMotivationalMsg.text = "Sedikit lagi selesai!"
+            }
+            progress >= 51 -> {
+                tvCalendarProgressEmoji.text = "🔥"
+                tvCalendarMotivationalMsg.text = "Kerja bagus, terus lanjutkan!"
+            }
+            progress >= 26 -> {
+                tvCalendarProgressEmoji.text = "🙂"
+                tvCalendarMotivationalMsg.text = "Kamu sudah membuat kemajuan!"
+            }
+            else -> {
+                tvCalendarProgressEmoji.text = "😴"
+                tvCalendarMotivationalMsg.text = "Ayo mulai selesaikan tugasmu!"
+            }
         }
     }
 
