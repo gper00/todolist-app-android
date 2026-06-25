@@ -24,6 +24,8 @@ import com.example.todolist.view.EditTaskActivity
 import com.example.todolist.view.ManageCategoriesActivity
 import com.example.todolist.viewmodel.TaskViewModel
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class HomeFragment : Fragment() {
 
@@ -40,6 +42,12 @@ class HomeFragment : Fragment() {
     private val viewModel: TaskViewModel by viewModels()
     private var selectedCategoryId: Int? = null
     private var selectedPriority: String? = null
+    
+    // Indonesia Locale consistency
+    private val idLocale = Locale("id", "ID")
+    private val dateFormat = SimpleDateFormat("dd MMMM yyyy", idLocale)
+    private val enFormat = SimpleDateFormat("dd MMMM yyyy", Locale.ENGLISH)
+    private val isoFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -47,7 +55,6 @@ class HomeFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_home, container, false)
 
-        // INIT VIEW
         rvTasks = view.findViewById(R.id.recyclerViewTask)
         rvCategories = view.findViewById(R.id.rvCategoryBadges)
         btnAddTask = view.findViewById(R.id.btnAddTask)
@@ -77,8 +84,26 @@ class HomeFragment : Fragment() {
         return view
     }
 
+    private fun normalizeDate(dateStr: String?): String {
+        if (dateStr.isNullOrEmpty()) return ""
+        try {
+            dateFormat.parse(dateStr)
+            return dateStr 
+        } catch (e: Exception) {
+            try {
+                val date = enFormat.parse(dateStr)
+                if (date != null) return dateFormat.format(date)
+            } catch (e2: Exception) {
+                try {
+                    val date = isoFormat.parse(dateStr)
+                    if (date != null) return dateFormat.format(date)
+                } catch (e3: Exception) {}
+            }
+        }
+        return dateStr
+    }
+
     private fun setupRecyclerViews() {
-        // Tasks
         taskAdapter = TaskAdapter(
             requireContext(),
             emptyList(),
@@ -96,27 +121,21 @@ class HomeFragment : Fragment() {
         rvTasks.layoutManager = LinearLayoutManager(requireContext())
         rvTasks.adapter = taskAdapter
 
-        // Categories
         categoryAdapter = CategoryBadgeAdapter(emptyList()) { category ->
-            // Toggle category selection
             if (selectedCategoryId == category.id) {
-                // Deselect if already selected
                 selectedCategoryId = null
                 categoryAdapter.setSelectedCategory(null)
-                applyFilters()
             } else {
-                // Select new category
                 selectedCategoryId = category.id
                 categoryAdapter.setSelectedCategory(category.id)
-                applyFilters()
             }
+            applyFilters()
         }
         rvCategories.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         rvCategories.adapter = categoryAdapter
     }
 
     private fun setupObservers() {
-        // Only observe allTasks if no category is selected
         viewModel.allTasks.observe(viewLifecycleOwner) { tasks ->
             if (selectedCategoryId == null && selectedPriority == null) {
                 taskAdapter.setData(tasks)
@@ -129,35 +148,21 @@ class HomeFragment : Fragment() {
     }
 
     private fun applyFilters() {
-        when {
-            selectedCategoryId != null && selectedPriority != null -> {
-                // Both category and priority selected
-                viewModel.getTasksByCategoryAndPriority(selectedCategoryId!!, selectedPriority!!)
-                    .observe(viewLifecycleOwner) { tasks ->
-                        taskAdapter.setData(tasks)
-                    }
-            }
-            selectedCategoryId != null -> {
-                // Only category selected
-                viewModel.getTasksByCategory(selectedCategoryId!!)
-                    .observe(viewLifecycleOwner) { tasks ->
-                        taskAdapter.setData(tasks)
-                    }
-            }
-            selectedPriority != null -> {
-                // Only priority selected
-                viewModel.getTasksByPriority(selectedPriority!!)
-                    .observe(viewLifecycleOwner) { tasks ->
-                        taskAdapter.setData(tasks)
-                    }
-            }
-            else -> {
-                // No filters selected, show all tasks
-                viewModel.allTasks.observe(viewLifecycleOwner) { tasks ->
-                    taskAdapter.setData(tasks)
-                }
-            }
+        if (selectedCategoryId == null && selectedPriority == null) {
+            viewModel.allTasks.observe(viewLifecycleOwner) { taskAdapter.setData(it) }
+            return
         }
+        
+        val liveData = when {
+            selectedCategoryId != null && selectedPriority != null -> 
+                viewModel.getTasksByCategoryAndPriority(selectedCategoryId!!, selectedPriority!!)
+            selectedCategoryId != null -> 
+                viewModel.getTasksByCategory(selectedCategoryId!!)
+            else -> 
+                viewModel.getTasksByPriority(selectedPriority!!)
+        }
+        
+        liveData.observe(viewLifecycleOwner) { taskAdapter.setData(it) }
     }
 
     private fun setupSearch() {
@@ -174,37 +179,25 @@ class HomeFragment : Fragment() {
 
     private fun showClearCompletedDialog() {
         AlertDialog.Builder(requireContext())
-            .setTitle("Clear Completed Tasks")
-            .setMessage("Are you sure you want to delete all completed tasks?")
-            .setPositiveButton("Yes") { _, _ ->
-                viewModel.deleteAllCompletedTasks()
-            }
-            .setNegativeButton("No", null)
+            .setTitle("Hapus Tugas Selesai")
+            .setMessage("Yakin ingin menghapus semua tugas yang sudah selesai?")
+            .setPositiveButton("Ya") { _, _ -> viewModel.deleteAllCompletedTasks() }
+            .setNegativeButton("Tidak", null)
             .show()
     }
 
     private fun setupPrioritySpinner() {
-        val priorities = arrayOf("All", "Low", "Medium", "High")
+        val priorities = arrayOf("Semua Prioritas", "Low", "Medium", "High")
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, priorities)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerPriority.adapter = adapter
 
         spinnerPriority.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: View?, position: Int, id: Long) {
-                selectedPriority = when (position) {
-                    0 -> null // All
-                    1 -> "Low"
-                    2 -> "Medium"
-                    3 -> "High"
-                    else -> null
-                }
+                selectedPriority = if (position == 0) null else priorities[position]
                 applyFilters()
             }
-
-            override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {
-                selectedPriority = null
-                applyFilters()
-            }
+            override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
         }
     }
 }

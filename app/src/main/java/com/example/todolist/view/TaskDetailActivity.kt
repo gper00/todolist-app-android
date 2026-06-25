@@ -13,6 +13,8 @@ import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class TaskDetailActivity : AppCompatActivity() {
 
@@ -24,6 +26,12 @@ class TaskDetailActivity : AppCompatActivity() {
     private lateinit var tvDescription: TextView
     private lateinit var layoutDeadline: View
     private lateinit var btnEdit: FloatingActionButton
+
+    // Formatters for normalization
+    private val idLocale = Locale("id", "ID")
+    private val idFormat = SimpleDateFormat("dd MMMM yyyy", idLocale)
+    private val enFormat = SimpleDateFormat("dd MMMM yyyy", Locale.ENGLISH)
+    private val isoFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,6 +70,25 @@ class TaskDetailActivity : AppCompatActivity() {
         if (taskId != -1) loadTaskDetails(taskId)
     }
 
+    private fun normalizeDate(dateStr: String?): String {
+        if (dateStr.isNullOrEmpty()) return ""
+        try {
+            idFormat.parse(dateStr)
+            return dateStr
+        } catch (e: Exception) {
+            try {
+                val date = enFormat.parse(dateStr)
+                if (date != null) return idFormat.format(date)
+            } catch (e2: Exception) {
+                try {
+                    val date = isoFormat.parse(dateStr)
+                    if (date != null) return idFormat.format(date)
+                } catch (e3: Exception) {}
+            }
+        }
+        return dateStr
+    }
+
     private fun loadTaskDetails(taskId: Int) {
         lifecycleScope.launch {
             val db = AppDatabase.getDatabase(this@TaskDetailActivity)
@@ -72,16 +99,13 @@ class TaskDetailActivity : AppCompatActivity() {
             runOnUiThread {
                 tvTitle.text = task.title
                 
-                // Category
                 if (category != null) {
                     cardCategory.visibility = View.VISIBLE
                     tvCategory.text = category.name
                     try {
                         val color = Color.parseColor(category.color)
                         cardCategory.setCardBackgroundColor(color)
-                        cardCategory.strokeWidth = 0 // Remove stroke for standard look
-                        
-                        // Dynamic text color for contrast
+                        cardCategory.strokeWidth = 0
                         val darkness = 1 - (0.299 * Color.red(color) + 0.587 * Color.green(color) + 0.114 * Color.blue(color)) / 255
                         tvCategory.setTextColor(if (darkness < 0.5) Color.BLACK else Color.WHITE)
                     } catch (e: Exception) {
@@ -92,7 +116,6 @@ class TaskDetailActivity : AppCompatActivity() {
                     cardCategory.visibility = View.GONE
                 }
 
-                // Priority
                 if (task.priority.isNotEmpty()) {
                     tvPriority.visibility = View.VISIBLE
                     tvPriority.text = task.priority
@@ -100,15 +123,13 @@ class TaskDetailActivity : AppCompatActivity() {
                     tvPriority.visibility = View.GONE
                 }
 
-                // Deadline
                 if (task.deadline.isNotEmpty()) {
                     layoutDeadline.visibility = View.VISIBLE
-                    tvDeadline.text = task.deadline
+                    tvDeadline.text = normalizeDate(task.deadline)
                 } else {
                     layoutDeadline.visibility = View.GONE
                 }
 
-                // Description
                 if (task.description.isNotEmpty()) {
                     tvDescription.text = task.description
                 } else {

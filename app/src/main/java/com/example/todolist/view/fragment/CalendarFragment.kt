@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.todolist.R
 import com.example.todolist.adapter.TaskAdapter
+import com.example.todolist.model.TaskWithCategory
 import com.example.todolist.view.AddTaskActivity
 import com.example.todolist.view.EditTaskActivity
 import com.example.todolist.viewmodel.TaskViewModel
@@ -41,7 +42,17 @@ class CalendarFragment : Fragment() {
     private lateinit var tvProgressPercent: TextView
 
     private val viewModel: TaskViewModel by viewModels()
-    private val sdf = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
+    
+    // Strict Indonesian Locale for storage and comparison
+    private val idLocale = Locale("id", "ID")
+    private val dateFormat = SimpleDateFormat("dd MMMM yyyy", idLocale)
+    
+    // Support for converting legacy data
+    private val enFormat = SimpleDateFormat("dd MMMM yyyy", Locale.ENGLISH)
+    private val isoFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+    
+    private var currentTasks: List<TaskWithCategory> = emptyList()
+    private var selectedDate: CalendarDay = CalendarDay.today()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -61,13 +72,10 @@ class CalendarFragment : Fragment() {
 
         setupRecyclerView()
 
-        // Set current date
-        val now = CalendarDay.today()
-        calendarView.setSelectedDate(now)
-        updateTasksForDate(now)
-
+        calendarView.setSelectedDate(selectedDate)
         calendarView.setOnDateChangedListener { _, date, _ ->
-            updateTasksForDate(date)
+            selectedDate = date
+            updateUI()
         }
         
         btnAddTask.setOnClickListener {
@@ -96,62 +104,80 @@ class CalendarFragment : Fragment() {
         )
         rvTasks.layoutManager = LinearLayoutManager(requireContext())
         rvTasks.adapter = adapter
+        // Let RecyclerView handle scrolling naturally within ConstraintLayout
+        rvTasks.isNestedScrollingEnabled = false 
     }
 
     private fun setupObservers() {
         viewModel.allTasks.observe(viewLifecycleOwner) { tasks ->
-            // Update decorators
-            val datesWithTasks = mutableSetOf<CalendarDay>()
-            tasks.forEach {
+            currentTasks = tasks
+            updateCalendarDecorators(tasks)
+            updateUI()
+        }
+    }
+
+    private fun normalizeDate(dateStr: String?): String {
+        if (dateStr.isNullOrEmpty()) return ""
+        try {
+            dateFormat.parse(dateStr)
+            return dateStr 
+        } catch (e: Exception) {
+            try {
+                val date = enFormat.parse(dateStr)
+                if (date != null) return dateFormat.format(date)
+            } catch (e2: Exception) {
                 try {
-                    val date = sdf.parse(it.task.deadline)
-                    if (date != null) {
-                        val cal = Calendar.getInstance()
-                        cal.time = date
-                        datesWithTasks.add(CalendarDay.from(cal))
-                    }
-                } catch (e: Exception) {}
+                    val date = isoFormat.parse(dateStr)
+                    if (date != null) return dateFormat.format(date)
+                } catch (e3: Exception) {}
             }
-            
-            calendarView.removeDecorators()
-            calendarView.addDecorator(EventDecorator(Color.RED, datesWithTasks))
-            
-            // Refresh current selected date list
-            calendarView.selectedDate?.let { updateTasksForDate(it) }
+        }
+        return dateStr
+    }
+
+    private fun updateCalendarDecorators(tasks: List<TaskWithCategory>) {
+        val datesWithTasks = mutableSetOf<CalendarDay>()
+        tasks.forEach {
+            try {
+                val date = dateFormat.parse(normalizeDate(it.task.deadline))
+                if (date != null) {
+                    val cal = Calendar.getInstance()
+                    cal.time = date
+                    datesWithTasks.add(CalendarDay.from(cal))
+                }
+            } catch (e: Exception) {}
+        }
+        
+        calendarView.removeDecorators()
+        calendarView.addDecorator(EventDecorator(Color.RED, datesWithTasks))
+    }
+
+    private fun updateUI() {
+        val selectedDateStr = dateFormat.format(selectedDate.date)
+        tvSelectedDate.text = "Tugas untuk $selectedDateStr"
+
+        val filteredTasks = currentTasks.filter { normalizeDate(it.task.deadline) == selectedDateStr }
+        adapter.setData(filteredTasks)
+        
+        val total = filteredTasks.size
+        val completed = filteredTasks.count { it.task.isDone }
+        
+        if (total > 0) {
+            val progress = (completed.toFloat() / total.toFloat() * 100).toInt()
+            pbCalendarProgress.progress = progress
+            tvProgressPercent.text = "$progress%"
+            tvCalendarProgressStatus.text = "$completed dari $total tugas selesai"
+            updateProgressTextAndEmoji(progress)
+        } else {
+            pbCalendarProgress.progress = 0
+            tvProgressPercent.text = "0%"
+            tvCalendarProgressStatus.text = "Tidak ada tugas"
+            tvCalendarProgressEmoji.text = "😴"
+            tvCalendarMotivationalMsg.text = "Ayo mulai selesaikan tugasmu!"
         }
     }
 
-    private fun updateTasksForDate(date: CalendarDay) {
-        val dateString = sdf.format(date.date)
-        tvSelectedDate.text = "Tasks for $dateString"
-
-        viewModel.allTasks.observe(viewLifecycleOwner) { tasks ->
-            val filteredTasks = tasks.filter { it.task.deadline == dateString }
-            adapter.setData(filteredTasks)
-            
-            // Update Progress
-            val total = filteredTasks.size
-            val completed = filteredTasks.count { it.task.isDone }
-            
-            if (total > 0) {
-                val progress = (completed.toFloat() / total.toFloat() * 100).toInt()
-                pbCalendarProgress.progress = progress
-                tvProgressPercent.text = "$progress%"
-                tvCalendarProgressStatus.text = "$completed dari $total tugas selesai"
-                
-                // Update Emoji and Motivation
-                updateProgressUI(progress)
-            } else {
-                pbCalendarProgress.progress = 0
-                tvProgressPercent.text = "0%"
-                tvCalendarProgressStatus.text = "Tidak ada tugas"
-                tvCalendarProgressEmoji.text = "😴"
-                tvCalendarMotivationalMsg.text = "Ayo mulai selesaikan tugasmu!"
-            }
-        }
-    }
-
-    private fun updateProgressUI(progress: Int) {
+    private fun updateProgressTextAndEmoji(progress: Int) {
         when {
             progress >= 100 -> {
                 tvCalendarProgressEmoji.text = "🎉"
@@ -176,14 +202,8 @@ class CalendarFragment : Fragment() {
         }
     }
 
-    // Decorator class for marking dates
     class EventDecorator(private val color: Int, private val dates: Collection<CalendarDay>) : DayViewDecorator {
-        override fun shouldDecorate(day: CalendarDay): Boolean {
-            return dates.contains(day)
-        }
-
-        override fun decorate(view: DayViewFacade) {
-            view.addSpan(DotSpan(5f, color))
-        }
+        override fun shouldDecorate(day: CalendarDay): Boolean = dates.contains(day)
+        override fun decorate(view: DayViewFacade) = view.addSpan(DotSpan(5f, color))
     }
 }

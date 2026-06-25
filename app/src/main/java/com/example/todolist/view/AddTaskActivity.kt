@@ -29,6 +29,9 @@ class AddTaskActivity : AppCompatActivity() {
     private val calendar = Calendar.getInstance()
     private val viewModel: TaskViewModel by viewModels()
     private var categoriesList: List<Category> = emptyList()
+    
+    // Konsisten menggunakan Locale Indonesia
+    private val dateFormat = SimpleDateFormat("dd MMMM yyyy", Locale("id", "ID"))
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,11 +46,9 @@ class AddTaskActivity : AppCompatActivity() {
 
         etDeadline.setOnClickListener { showDatePicker() }
 
-        // Priority List
         val priorityList = arrayOf("Low", "Medium", "High")
         autoCompletePriority.setAdapter(ArrayAdapter(this, android.R.layout.simple_list_item_1, priorityList))
 
-        // Observe Categories from DB
         viewModel.allCategories.observe(this) { categories ->
             categoriesList = categories
             val categoryNames = categories.map { it.name }
@@ -60,20 +61,18 @@ class AddTaskActivity : AppCompatActivity() {
             val deadline = etDeadline.text.toString().trim()
             val priority = autoCompletePriority.text.toString().trim()
             
-            // Validate Title (Only required field)
             if (title.isEmpty()) {
                 etTitle.error = "Task title is required"
                 return@setOnClickListener
             }
 
-            // Find selected category ID if any
             val categoryName = autoCompleteCategory.text.toString()
             val selectedCategory = categoriesList.find { it.name == categoryName }
 
             val task = Task(
                 title = title,
                 description = description,
-                deadline = deadline,
+                deadline = deadline, // Disimpan dalam format Indonesia (misal: "15 Juni 2026")
                 priority = priority,
                 categoryId = selectedCategory?.id
             )
@@ -92,7 +91,6 @@ class AddTaskActivity : AppCompatActivity() {
     }
 
     private fun updateDateField() {
-        val format = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
-        etDeadline.setText(format.format(calendar.time))
+        etDeadline.setText(dateFormat.format(calendar.time))
     }
 }

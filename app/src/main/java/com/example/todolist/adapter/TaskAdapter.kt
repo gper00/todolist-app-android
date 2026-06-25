@@ -11,6 +11,7 @@ import android.widget.CheckBox
 import android.widget.ImageButton
 import android.widget.PopupMenu
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.todolist.R
 import com.example.todolist.model.Task
@@ -49,7 +50,6 @@ class TaskAdapter(
 
         holder.tvTitle.text = task.title
         
-        // Handle Priority Visibility
         if (task.priority.isNotEmpty()) {
             holder.tvPriority.visibility = View.VISIBLE
             holder.tvPriority.text = task.priority
@@ -57,29 +57,25 @@ class TaskAdapter(
             holder.tvPriority.visibility = View.GONE
         }
 
-        // Fix CheckBox recycling bug
         holder.checkDone.setOnCheckedChangeListener(null)
         holder.checkDone.isChecked = task.isDone
 
-        // Set Category Color (Left Strip)
         val drawable = GradientDrawable()
         drawable.shape = GradientDrawable.RECTANGLE
         try {
-            val colorStr = category?.color ?: "#E0E0E0" // Default light gray if no category
+            val colorStr = category?.color ?: "#E0E0E0"
             drawable.setColor(Color.parseColor(colorStr))
         } catch (e: Exception) {
             drawable.setColor(Color.LTGRAY)
         }
         holder.viewCategoryColor.background = drawable
 
-        // Navigate to Details on Click
         holder.itemView.setOnClickListener {
             val intent = Intent(it.context, TaskDetailActivity::class.java)
             intent.putExtra("taskId", task.id)
             it.context.startActivity(intent)
         }
 
-        // Options Menu
         holder.btnOptions.setOnClickListener { view ->
             val popup = PopupMenu(view.context, view)
             popup.menu.add("Edit")
@@ -97,15 +93,16 @@ class TaskAdapter(
             popup.show()
         }
 
-        // Re-attach listener
         holder.checkDone.setOnCheckedChangeListener { _, isChecked ->
             onChecked(task, isChecked)
         }
     }
 
     fun setData(newList: List<TaskWithCategory>) {
+        val diffCallback = TaskDiffCallback(taskList, newList)
+        val diffResult = DiffUtil.calculateDiff(diffCallback)
         taskList = newList
-        notifyDataSetChanged()
+        diffResult.dispatchUpdatesTo(this)
     }
 
     private fun showUndoSnackbar(task: Task, view: View) {
@@ -114,5 +111,21 @@ class TaskAdapter(
                 onUndo(task)
             }
             .show()
+    }
+
+    class TaskDiffCallback(
+        private val oldList: List<TaskWithCategory>,
+        private val newList: List<TaskWithCategory>
+    ) : DiffUtil.Callback() {
+        override fun getOldListSize(): Int = oldList.size
+        override fun getNewListSize(): Int = newList.size
+
+        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return oldList[oldItemPosition].task.id == newList[newItemPosition].task.id
+        }
+
+        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return oldList[oldItemPosition] == newList[newItemPosition]
+        }
     }
 }
