@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.todolist.R
 import com.example.todolist.adapter.CategoryAdapter
 import com.example.todolist.model.Category
+import com.example.todolist.utils.ThemeStorage
 import com.example.todolist.viewmodel.TaskViewModel
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -23,9 +24,14 @@ class ManageCategoriesActivity : AppCompatActivity() {
     private lateinit var rvCategories: RecyclerView
     private lateinit var tvEmpty: TextView
     private lateinit var adapter: CategoryAdapter
+    private lateinit var themeStorage: ThemeStorage
     private val viewModel: TaskViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Terapkan tema
+        themeStorage = ThemeStorage(this)
+        setTheme(themeStorage.getThemeResource())
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_manage_categories)
 

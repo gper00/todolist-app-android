@@ -17,7 +17,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Edit Task"
-            android:textColor="@color/primary"
+            android:textColor="?attr/colorPrimary"
             android:textSize="32sp"
             android:textStyle="bold"/>
 
@@ -40,8 +40,8 @@
             app:boxCornerRadiusTopEnd="20dp"
             app:boxCornerRadiusBottomStart="20dp"
             app:boxCornerRadiusBottomEnd="20dp"
-            app:boxStrokeColor="@color/primary"
-            app:hintTextColor="@color/primary">
+            app:boxStrokeColor="?attr/colorPrimary"
+            app:hintTextColor="?attr/colorPrimary">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etTitle"
@@ -61,8 +61,8 @@
             app:boxCornerRadiusTopEnd="20dp"
             app:boxCornerRadiusBottomStart="20dp"
             app:boxCornerRadiusBottomEnd="20dp"
-            app:boxStrokeColor="@color/primary"
-            app:hintTextColor="@color/primary">
+            app:boxStrokeColor="?attr/colorPrimary"
+            app:hintTextColor="?attr/colorPrimary">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etDescription"
@@ -84,8 +84,8 @@
             app:boxCornerRadiusTopEnd="20dp"
             app:boxCornerRadiusBottomStart="20dp"
             app:boxCornerRadiusBottomEnd="20dp"
-            app:boxStrokeColor="@color/primary"
-            app:hintTextColor="@color/primary"
+            app:boxStrokeColor="?attr/colorPrimary"
+            app:hintTextColor="?attr/colorPrimary"
             app:endIconMode="custom"
             app:endIconDrawable="@android:drawable/ic_menu_my_calendar">
 
@@ -110,8 +110,8 @@
             app:boxCornerRadiusTopEnd="20dp"
             app:boxCornerRadiusBottomStart="20dp"
             app:boxCornerRadiusBottomEnd="20dp"
-            app:boxStrokeColor="@color/primary"
-            app:hintTextColor="@color/primary">
+            app:boxStrokeColor="?attr/colorPrimary"
+            app:hintTextColor="?attr/colorPrimary">
 
             <AutoCompleteTextView
                 android:id="@+id/autoCompletePriority"
@@ -135,8 +135,8 @@
             app:boxCornerRadiusTopEnd="20dp"
             app:boxCornerRadiusBottomStart="20dp"
             app:boxCornerRadiusBottomEnd="20dp"
-            app:boxStrokeColor="@color/primary"
-            app:hintTextColor="@color/primary">
+            app:boxStrokeColor="?attr/colorPrimary"
+            app:hintTextColor="?attr/colorPrimary">
 
             <AutoCompleteTextView
                 android:id="@+id/autoCompleteCategory"
@@ -159,7 +159,7 @@
             android:text="Update Task"
             android:textColor="@android:color/white"
             android:textStyle="bold"
-            android:backgroundTint="@color/primary"
+            android:backgroundTint="?attr/colorPrimary"
             app:cornerRadius="20dp"/>
 
     </LinearLayout>

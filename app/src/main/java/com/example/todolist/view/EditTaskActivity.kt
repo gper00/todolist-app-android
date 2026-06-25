@@ -11,6 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import com.example.todolist.R
 import com.example.todolist.database.AppDatabase
 import com.example.todolist.model.Category
+import com.example.todolist.utils.ThemeStorage
 import com.example.todolist.viewmodel.TaskViewModel
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
@@ -27,19 +28,21 @@ class EditTaskActivity : AppCompatActivity() {
     private lateinit var autoCompletePriority: AutoCompleteTextView
     private lateinit var autoCompleteCategory: AutoCompleteTextView
     private lateinit var btnUpdate: MaterialButton
+    private lateinit var themeStorage: ThemeStorage
 
     private val calendar = Calendar.getInstance()
     private val viewModel: TaskViewModel by viewModels()
     private var categoriesList: List<Category> = emptyList()
     
-    // Gunakan Locale Indonesia secara konsisten
     private val dateFormat = SimpleDateFormat("dd MMMM yyyy", Locale("id", "ID"))
-    
-    // Formatter pendukung untuk membaca data lama
-    private val engFormat = SimpleDateFormat("dd MMMM yyyy", Locale.ENGLISH)
+    private val enFormat = SimpleDateFormat("dd MMMM yyyy", Locale.ENGLISH)
     private val isoFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Terapkan tema
+        themeStorage = ThemeStorage(this)
+        setTheme(themeStorage.getThemeResource())
+        
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_task)
 
@@ -51,7 +54,6 @@ class EditTaskActivity : AppCompatActivity() {
         btnUpdate = findViewById(R.id.btnUpdate)
 
         val taskId = intent.getIntExtra("taskId", 0)
-
         etDeadline.setOnClickListener { showDatePicker() }
 
         val priorityList = arrayOf("Low", "Medium", "High")
@@ -79,10 +81,7 @@ class EditTaskActivity : AppCompatActivity() {
             runOnUiThread {
                 etTitle.setText(task.title)
                 etDescription.setText(task.description)
-                
-                // Normalisasi tanggal saat dibaca agar tampil dalam format Indonesia
                 etDeadline.setText(normalizeDate(task.deadline))
-                
                 autoCompletePriority.setText(task.priority, false)
                 category?.let {
                     autoCompleteCategory.setText(it.name, false)
@@ -98,7 +97,7 @@ class EditTaskActivity : AppCompatActivity() {
             return dateStr 
         } catch (e: Exception) {
             try {
-                val date = engFormat.parse(dateStr)
+                val date = enFormat.parse(dateStr)
                 if (date != null) return dateFormat.format(date)
             } catch (e2: Exception) {
                 try {
@@ -132,7 +131,7 @@ class EditTaskActivity : AppCompatActivity() {
             viewModel.updateTask(oldTask.copy(
                 title = title,
                 description = description,
-                deadline = deadline, // Disimpan dalam format Indonesia
+                deadline = deadline,
                 priority = priority,
                 categoryId = selectedCategory?.id
             ))

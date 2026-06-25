@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.todolist.R
 import com.example.todolist.model.Category
 import com.example.todolist.model.Task
+import com.example.todolist.utils.ThemeStorage
 import com.example.todolist.viewmodel.TaskViewModel
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
@@ -25,15 +26,19 @@ class AddTaskActivity : AppCompatActivity() {
     private lateinit var autoCompletePriority: AutoCompleteTextView
     private lateinit var autoCompleteCategory: AutoCompleteTextView
     private lateinit var btnSave: MaterialButton
+    private lateinit var themeStorage: ThemeStorage
 
     private val calendar = Calendar.getInstance()
     private val viewModel: TaskViewModel by viewModels()
     private var categoriesList: List<Category> = emptyList()
     
-    // Konsisten menggunakan Locale Indonesia
     private val dateFormat = SimpleDateFormat("dd MMMM yyyy", Locale("id", "ID"))
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Terapkan tema sebelum super.onCreate
+        themeStorage = ThemeStorage(this)
+        setTheme(themeStorage.getThemeResource())
+        
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_task)
 
@@ -72,7 +77,7 @@ class AddTaskActivity : AppCompatActivity() {
             val task = Task(
                 title = title,
                 description = description,
-                deadline = deadline, // Disimpan dalam format Indonesia (misal: "15 Juni 2026")
+                deadline = deadline,
                 priority = priority,
                 categoryId = selectedCategory?.id
             )

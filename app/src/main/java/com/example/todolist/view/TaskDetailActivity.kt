@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.todolist.R
 import com.example.todolist.database.AppDatabase
+import com.example.todolist.utils.ThemeStorage
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -26,6 +27,7 @@ class TaskDetailActivity : AppCompatActivity() {
     private lateinit var tvDescription: TextView
     private lateinit var layoutDeadline: View
     private lateinit var btnEdit: FloatingActionButton
+    private lateinit var themeStorage: ThemeStorage
 
     // Formatters for normalization
     private val idLocale = Locale("id", "ID")
@@ -34,6 +36,10 @@ class TaskDetailActivity : AppCompatActivity() {
     private val isoFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Terapkan tema
+        themeStorage = ThemeStorage(this)
+        setTheme(themeStorage.getThemeResource())
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_task_detail)
 

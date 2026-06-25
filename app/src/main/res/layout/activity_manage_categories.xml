@@ -10,7 +10,7 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@color/primary"
+        android:background="?attr/colorPrimary"
         app:title="Manage Categories"
         app:titleTextColor="@android:color/white"
         app:navigationIcon="@android:drawable/ic_menu_revert"
@@ -44,7 +44,7 @@
         android:layout_alignParentBottom="true"
         android:layout_margin="24dp"
         android:src="@android:drawable/ic_input_add"
-        app:backgroundTint="@color/primary"
+        app:backgroundTint="?attr/colorPrimary"
         app:tint="@android:color/white" />
 
 </RelativeLayout>
