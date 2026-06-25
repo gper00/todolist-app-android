@@ -39,8 +39,21 @@ class ProfileFragment : Fragment() {
     private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         if (uri != null) {
             selectedImageUri = uri
-            ivProfileImage.setImageURI(uri)
-            updateProfile(tvProfileName.text.toString(), uri)
+            
+            try {
+                // Mencoba mendapatkan izin akses URI yang menetap
+                val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                requireContext().contentResolver.takePersistableUriPermission(uri, takeFlags)
+            } catch (e: Exception) {
+                // Abaikan jika tidak didukung oleh provider
+            }
+
+            try {
+                ivProfileImage.setImageURI(uri)
+                updateProfile(tvProfileName.text.toString(), uri)
+            } catch (e: Exception) {
+                ivProfileImage.setImageResource(R.drawable.user)
+            }
         }
     }
 
@@ -70,9 +83,10 @@ class ProfileFragment : Fragment() {
         loadUserData()
 
         viewModel.allTasks.observe(viewLifecycleOwner) { tasks ->
-            tvTotalTasks.text = tasks.size.toString()
-            val completedCount = tasks.count { it.task.isDone }
-            tvCompletedTasks.text = completedCount.toString()
+            tasks?.let {
+                tvTotalTasks.text = it.size.toString()
+                tvCompletedTasks.text = it.count { task -> task.task.isDone }.toString()
+            }
         }
 
         btnEditProfile.setOnClickListener {
@@ -91,11 +105,23 @@ class ProfileFragment : Fragment() {
     }
 
     private fun loadUserData() {
-        val user = auth.currentUser
-        tvProfileName.text = user?.displayName ?: "User Name"
-        tvProfileEmail.text = user?.email ?: "No email"
-        if (user?.photoUrl != null) {
-            ivProfileImage.setImageURI(user.photoUrl)
+        val user = auth.currentUser ?: return
+        tvProfileName.text = user.displayName ?: "User Name"
+        tvProfileEmail.text = user.email ?: "No email"
+        
+        val photoUrl = user.photoUrl
+        if (photoUrl != null) {
+            try {
+                // Memastikan izin akses masih berlaku sebelum memuat gambar
+                val pfd = requireContext().contentResolver.openFileDescriptor(photoUrl, "r")
+                pfd?.close()
+                ivProfileImage.setImageURI(photoUrl)
+            } catch (e: Exception) {
+                // Jika izin kedaluwarsa atau file hilang, gunakan gambar default
+                ivProfileImage.setImageResource(R.drawable.user)
+            }
+        } else {
+            ivProfileImage.setImageResource(R.drawable.user)
         }
     }
 
@@ -147,7 +173,7 @@ class ProfileFragment : Fragment() {
     }
 
     private fun updateProfile(name: String, photoUri: Uri?) {
-        val user = auth.currentUser
+        val user = auth.currentUser ?: return
         val profileUpdates = UserProfileChangeRequest.Builder()
             .setDisplayName(name)
             .apply {
@@ -155,23 +181,23 @@ class ProfileFragment : Fragment() {
             }
             .build()
 
-        user?.updateProfile(profileUpdates)?.addOnCompleteListener { task ->
-            if (task.isSuccessful) {
+        user.updateProfile(profileUpdates).addOnCompleteListener { task ->
+            if (isAdded && task.isSuccessful) {
                 tvProfileName.text = name
                 Toast.makeText(context, "Profil diperbarui", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(context, "Gagal memperbarui profil", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
     private fun updatePassword(password: String) {
-        val user = auth.currentUser
-        user?.updatePassword(password)?.addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                Toast.makeText(context, "Password berhasil diubah", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(context, "Gagal mengubah password: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+        val user = auth.currentUser ?: return
+        user.updatePassword(password).addOnCompleteListener { task ->
+            if (isAdded) {
+                if (task.isSuccessful) {
+                    Toast.makeText(context, "Password berhasil diubah", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(context, "Gagal mengubah password: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                }
             }
         }
     }
