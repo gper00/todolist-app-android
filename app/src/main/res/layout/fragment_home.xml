@@ -11,7 +11,7 @@
         android:id="@+id/headerLayout"
         android:layout_width="match_parent"
         android:layout_height="140dp"
-        android:background="@color/primary"
+        android:background="?attr/colorPrimary"
         android:orientation="vertical"
         android:padding="24dp">
 
@@ -101,7 +101,7 @@
             android:layout_height="40dp"
             android:layout_marginStart="8dp"
             android:background="@drawable/spinner_bg"
-            android:backgroundTint="@color/primary"
+            android:backgroundTint="?attr/colorPrimary"
             android:src="@android:drawable/ic_input_add"
             app:tint="@android:color/white" />
 
@@ -133,7 +133,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:minWidth="120dp"
-            android:backgroundTint="@color/primary" />
+            android:backgroundTint="?attr/colorPrimary" />
 
     </LinearLayout>
 
@@ -171,6 +171,6 @@
         android:layout_margin="22dp"
         android:src="@android:drawable/ic_input_add"
         app:tint="@android:color/white"
-        app:backgroundTint="@color/primary"/>
+        app:backgroundTint="?attr/colorPrimary"/>
 
 </RelativeLayout>

@@ -49,13 +49,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun replaceFragment(fragment: Fragment) {
+        // Use commitAllowingStateLoss to prevent crashes during activity restart/theme change
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragmentContainer, fragment)
-            .commit()
+            .commitAllowingStateLoss()
     }
     
     fun restartActivity() {
-        finish()
-        startActivity(intent)
+        // Using recreate() is safer and standard for theme changes
+        recreate()
     }
 }
